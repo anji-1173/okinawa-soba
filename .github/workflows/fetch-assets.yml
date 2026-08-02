@@ -1,0 +1,25 @@
+name: fetch-issue-assets
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download issue attachments
+        run: |
+          mkdir -p incoming
+          i=1
+          for u in b9857ac1-4612-49dc-85e5-0ee33a37eace 417992ab-1da3-47f1-ab18-cbcd0c7e690e 0d3f1ad1-5a0f-49aa-9268-432a1b72c413 20921e1b-d221-4e02-985c-36ae2299d5eb 3a13205f-73b5-45c8-b617-9f8fbae1b81f cebd332d-62ec-4c02-b487-21317170ef41 fe872422-fab0-4988-873a-22c6fda8fd8a; do
+            curl -sL "https://github.com/user-attachments/assets/$u" -o incoming/$(printf %02d $i).jpg
+            i=$((i+1))
+          done
+          file incoming/*
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add incoming
+          git commit -m "畑人市場写真をIssue#3から取り込み [skip ci]"
+          git push
