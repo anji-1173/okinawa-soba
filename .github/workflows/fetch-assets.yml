@@ -1,0 +1,25 @@
+name: fetch-issue-assets
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download issue attachments
+        run: |
+          mkdir -p incoming
+          i=1
+          for u in 5918ed61-57bf-478f-a4a0-94a69796d397 24005dc7-87ef-419f-ad50-3c5a90b52453 e1cee0f2-f27d-48e3-85eb-56422fcb74fd 8711be44-6bf1-4bd1-bbd5-9c80c754f88e 4a187fa7-c5a8-4179-b7f1-8e3059ba5086 220dc656-162e-4131-afdd-01a34cc359a5 44ae8e6f-6edc-417a-8a62-2b66ac501ca5 6e50f840-c5ed-4d86-9316-782b3acf1098 1ee3831e-d744-434e-8611-0b93b078dab3 f644bc4e-fbcf-4d03-8a1b-c5c8274caa18 bdab64b1-33f8-499a-af47-d9fd2f27a5c8 0c901872-576d-440c-a970-2e55eff46a95; do
+            curl -sL "https://github.com/user-attachments/assets/$u" -o incoming/$(printf %02d $i).jpg
+            i=$((i+1))
+          done
+          file incoming/*
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add incoming
+          git commit -m "ながどう家写真をIssue#4から取り込み [skip ci]"
+          git push
