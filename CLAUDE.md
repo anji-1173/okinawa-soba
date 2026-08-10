@@ -23,7 +23,7 @@
 3. 本文を**一字一句そのまま**（要約・改変しない）、写真を正しい順で挿入。星評価・訪問区切りを付与。
 4. カードの説明文・地域・タグを更新。地域/ピンをネットで確定（下記ルール）。
 5. Playwright で全記事を検証（下記）。
-6. 両リポジトリへコミット＆プッシュ → GitHub Pages のビルド成功まで確認。
+6. このリポジトリの `main` へコミット＆プッシュ → GitHub Pages のビルド成功まで確認。
 7. 決まった形式で報告（下記）。
 - 挿入は python スクリプト（ARTICLES/geo は文字列操作、SOBA_SHOPS/PHOTOS は json）で行い、
   最後に `node -e "new Function(script)"` で全 `<script>` ブロックを構文チェックする。
@@ -55,9 +55,10 @@
 - 記事の「画像」マーカー数より写真が少ない/位置が合わない分は無理に埋めず、未使用として報告する。
 
 ## 公開（デプロイ）手順
-- 作業リポジトリ: `anji-1173/claude` ブランチ `claude/okinawa-soba-blog-site-s7h78g`
-- 公開リポジトリ（GitHub Pages）: `anji-1173/okinawa-soba` ブランチ `main`（pub clone は scratchpad/pub）
-- 同じ index.html を両方へプッシュする。push は `-u origin <branch>`、ネットワーク失敗のみ指数バックオフで最大4回リトライ。
+- このリポジトリ `anji-1173/okinawa-soba` ブランチ `main` が、作業場所であり公開場所（GitHub Pages）。
+  ここ1つで完結する。**2026年8月に独立リポジトリになったので、以前の `anji-1173/claude` へは
+  もうプッシュしない**（あちらに古い作業用の枝はもう残っていない）。
+- push は `-u origin main`、ネットワーク失敗のみ指数バックオフで最大4回リトライ。
 - Pages ビルドは `curl .../actions/runs?per_page=1` で status/conclusion を確認。queued/failed で止まったら
   空コミット `git commit --allow-empty` で再トリガー。conclusion=success まで見届ける。
 
