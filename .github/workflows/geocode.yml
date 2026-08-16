@@ -7,48 +7,66 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: geocode all pins via GSI
+      - name: resolve remaining
         run: |
           python3 - <<'PY'
-          import json, urllib.parse, urllib.request, re, time
-          pins = json.load(open('pins.json'))
-          out = []
-          def clean(a):
-              # 括弧内の補足を除去し、末尾の枝番も残したまま問い合わせる
-              a = re.sub(r'[（(].*?[）)]', '', a).strip()
-              return a
-          def q(addr):
-              url = "https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + urllib.parse.quote(addr)
+          import json, re, time, urllib.parse, urllib.request
+          items = json.load(open('unresolved.json'))
+          UA = 'okinawa-soba-blog/1.0'
+          def get(url, data=None):
+              req = urllib.request.Request(url, data=data, headers={'User-Agent': UA})
               try:
-                  with urllib.request.urlopen(url, timeout=20) as r:
-                      return json.loads(r.read().decode())
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      return r.read().decode()
               except Exception as e:
-                  return {"error": str(e)}
-          for i, p in enumerate(pins):
-              a = clean(p['addr'] or '')
-              cands = []
-              tries = [a]
-              # 枝番を削って字レベルまで段階的に短くしたものも試す
-              m = re.match(r'^(.*?[市町村].*?)([0-9０-９].*)$', a)
-              if m: tries.append(m.group(1))
-              for t in dict.fromkeys(tries):
-                  if not t: continue
-                  r = q('沖縄県' + t if not t.startswith('沖縄県') else t)
-                  if isinstance(r, list) and r:
-                      for f in r[:3]:
-                          cands.append({'query': t, 'title': f['properties']['title'],
-                                        'lng': f['geometry']['coordinates'][0],
-                                        'lat': f['geometry']['coordinates'][1]})
-                  time.sleep(0.15)
-              out.append({'name': p['name'], 'addr': p['addr'], 'lat': p['lat'], 'lng': p['lng'], 'cands': cands})
-              if i % 25 == 0: print(i, p['name'], len(cands), flush=True)
-          json.dump(out, open('geo_result.json','w'), ensure_ascii=False, indent=1)
-          print('done', len(out))
+                  return json.dumps({'error': str(e)})
+          def gsi(a):
+              try:
+                  return json.loads(get("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+urllib.parse.quote(a)))
+              except Exception:
+                  return []
+          out = []
+          for name, addr in items:
+              rec = {'name': name, 'addr': addr, 'gsi': [], 'osm': []}
+              a = re.sub(r'[（(].*?[）)]', '', addr or '').strip()
+              a = re.sub(r'\s+.*$', '', a)
+              variants = [a, a.replace('字',''), re.sub(r'[-‐−]\d+$', '', a),
+                          re.sub(r'([0-9]+)[-‐−][0-9]+$', r'\1', a.replace('字','')),
+                          re.sub(r'(富着)', '冨着', a), re.sub(r'(冨着)', '富着', a)]
+              for v in dict.fromkeys([x for x in variants if x]):
+                  r = gsi('沖縄県'+v if not v.startswith('沖縄県') else v)
+                  if isinstance(r, list):
+                      for f in r[:2]:
+                          rec['gsi'].append({'q': v, 'title': f['properties']['title'],
+                                             'lat': f['geometry']['coordinates'][1],
+                                             'lng': f['geometry']['coordinates'][0]})
+                  time.sleep(0.12)
+              # OSM 店名検索（沖縄本島全域）
+              nm = re.sub(r'[（(].*?[）)]', '', name).strip()
+              nm = re.sub(r'[　\s]+', '', nm)
+              key = nm[:6]
+              ql = '[out:json][timeout:60];nwr["name"~"%s"](26.0,127.5,26.95,128.4);out center tags;' % re.escape(key).replace('\\','')
+              body = ('data='+urllib.parse.quote(ql)).encode()
+              try:
+                  o = json.loads(get('https://overpass-api.de/api/interpreter', body))
+                  for e in o.get('elements', [])[:6]:
+                      lat = e.get('lat') or e.get('center', {}).get('lat')
+                      lng = e.get('lon') or e.get('center', {}).get('lon')
+                      t = e.get('tags', {})
+                      rec['osm'].append({'name': t.get('name'), 'lat': lat, 'lng': lng,
+                                         'addr': t.get('addr:full') or t.get('addr:housenumber'),
+                                         'amenity': t.get('amenity')})
+              except Exception as e:
+                  rec['osm_err'] = str(e)
+              time.sleep(1.2)
+              out.append(rec)
+              print(name, len(rec['gsi']), len(rec['osm']), flush=True)
+          json.dump(out, open('geo_round2.json','w'), ensure_ascii=False, indent=1)
           PY
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
-          git add geo_result.json
-          git commit -m "geocode all pins [skip ci]"
+          git add geo_round2.json
+          git commit -m "geocode round2 [skip ci]"
           git push
