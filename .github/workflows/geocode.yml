@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: round4
+      - name: round5
         run: |
           python3 - <<'PY'
           import json, urllib.parse, urllib.request, time
@@ -16,32 +16,32 @@ jobs:
               r=urllib.request.Request('https://overpass-api.de/api/interpreter',
                     data=('data='+urllib.parse.quote(ql)).encode(), headers={'User-Agent':UA})
               try:
-                  with urllib.request.urlopen(r,timeout=120) as x: return json.loads(x.read().decode())
+                  with urllib.request.urlopen(r,timeout=150) as x: return json.loads(x.read().decode())
               except Exception as e: return {'error':str(e)}
           out={}
           Q={
-           'izumi_all':'[out:json][timeout:120];nwr(26.630,127.925,26.672,127.980)["name"];out center tags;',
-           'byname':'[out:json][timeout:120];nwr["name"~"森の家|伊豆味そば|シーサー園|伊豆味小中|そば屋さん|わぁ|我那覇"](26.0,127.5,26.95,128.4);out center tags;',
-           'motobu_soba':'[out:json][timeout:120];nwr["amenity"~"restaurant|cafe"](26.675,127.855,26.710,127.905);out center tags;',
-           'makiya2':'[out:json][timeout:120];nwr(26.600,127.995,26.665,128.070)["name"];out center tags;',
-           'okuma2':'[out:json][timeout:120];nwr(26.715,128.145,26.755,128.215)["name"];out center tags;',
+           'izumi_food':'[out:json][timeout:150];nwr["amenity"~"restaurant|cafe|fast_food"](26.630,127.925,26.672,127.980);out center tags;',
+           'izumi_bus':'[out:json][timeout:150];node["highway"="bus_stop"](26.630,127.925,26.672,127.980);out;',
+           'makiya':'[out:json][timeout:150];nwr["amenity"~"restaurant|cafe|shop|marketplace"](26.620,128.020,26.655,128.055);out center tags;',
+           'hanejinoeki':'[out:json][timeout:150];nwr["name"~"羽地"](26.55,127.98,26.68,128.10);out center tags;',
+           'okuma':'[out:json][timeout:150];nwr["amenity"~"restaurant|cafe"](26.715,128.150,26.750,128.200);out center tags;',
+           'motobusobaya':'[out:json][timeout:150];nwr["name"~"そば"](26.660,127.850,26.715,127.920);out center tags;',
           }
           for k,ql in Q.items():
               j=ov(ql); res=[]
               for e in j.get('elements',[]):
                   t=e.get('tags',{})
-                  if not t.get('name'): continue
-                  res.append({'name':t['name'],'lat':e.get('lat') or e.get('center',{}).get('lat'),
+                  res.append({'name':t.get('name','(無名)'),'lat':e.get('lat') or e.get('center',{}).get('lat'),
                               'lng':e.get('lon') or e.get('center',{}).get('lon'),
-                              'k':t.get('amenity') or t.get('shop') or t.get('tourism') or t.get('place') or t.get('highway') or t.get('amenity') or ''})
+                              'k':t.get('amenity') or t.get('highway') or t.get('shop') or ''})
               out[k]=res if res else j
-              print(k, len(res), flush=True); time.sleep(3)
-          json.dump(out, open('geo_round4.json','w'), ensure_ascii=False, indent=1)
+              print(k, len(res), flush=True); time.sleep(4)
+          json.dump(out, open('geo_round5.json','w'), ensure_ascii=False, indent=1)
           PY
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
-          git add geo_round4.json
-          git commit -m "geocode round4 [skip ci]"
+          git add geo_round5.json
+          git commit -m "geocode round5 [skip ci]"
           git push
