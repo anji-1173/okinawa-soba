@@ -12,30 +12,22 @@ jobs:
           rm -rf geoout && mkdir -p geoout
           UA="okinawa-soba-blog/1.0 (contact: anji_uchima@yahoo.co.jp)"
           run_ql () {
-            local name="$1"; local ql="$2"
-            python3 - "$ql" > body.txt <<'PY'
+            python3 - "$2" > body.txt <<'PY'
           import sys,urllib.parse
           print("data="+urllib.parse.quote(sys.argv[1]))
           PY
-            curl -s -A "$UA" -X POST --data @body.txt https://overpass-api.de/api/interpreter > geoout/$name.json
-            head -c 120 geoout/$name.json; echo " <- $name"
+            curl -s -A "$UA" -X POST --data @body.txt https://overpass-api.de/api/interpreter > geoout/$1.json
           }
-          run_ql churahana '[out:json][timeout:90];nwr["name"~"美ら花"](26.0,127.5,26.9,128.4);out center;'
-          run_ql koki '[out:json][timeout:90];nwr(26.534,127.940,26.546,127.960)["amenity"];out center;'
-          run_ql kokipark '[out:json][timeout:90];nwr["name"~"幸喜"](26.52,127.93,26.56,127.99);out center;'
-          run_ql koza '[out:json][timeout:90];nwr["name"~"鉢巻|はちまき|ナンクル|796"](26.32,127.78,26.36,127.82);out center;'
-          # Nominatim（間隔を空ける）
-          for q in "美ら花別邸" "美ら花 名護" "幸喜公園 名護市"; do
-            echo "=== $q" >> geoout/nominatim.txt
-            curl -s -A "$UA" "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$q")" >> geoout/nominatim.txt
-            echo "" >> geoout/nominatim.txt
-            sleep 3
-          done
+          # 幸喜周辺の全POI（タグ全部）
+          run_ql koki_full '[out:json][timeout:120];nwr(26.5355,127.9440,26.5430,127.9560);out center tags;'
+          sleep 5
+          # 美ら花（名護市全域）
+          run_ql churahana '[out:json][timeout:120];area["name"="名護市"]->.a;nwr(area.a)["name"~"美ら花"];out center tags;'
           wc -c geoout/*
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
           git add -A geoout
-          git commit -m "geocode results 3 [skip ci]"
+          git commit -m "geocode results 4 [skip ci]"
           git push
