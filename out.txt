@@ -1,4 +1,0 @@
-=== 沖縄県那覇市鏡水150
-[{"geometry":{"coordinates":[127.649277,26.210526],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県那覇市鏡水１５０番地"}}]
-=== 沖縄県那覇市鏡水
-[{"geometry":{"coordinates":[127.651985,26.210712],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県那覇市鏡水"}}]
