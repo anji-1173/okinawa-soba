@@ -1,0 +1,38 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-08-16T07:07:57Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 5885062515,
+  "lat": 26.5390013,
+  "lon": 127.9481575,
+  "tags": {
+    "name": "幸喜ビーチ",
+    "name:en": "Koki Beach",
+    "natural": "beach"
+  }
+},
+{
+  "type": "node",
+  "id": 8302825348,
+  "lat": 26.5396727,
+  "lon": 127.9521632,
+  "tags": {
+    "name": "幸喜",
+    "name:en": "Koki",
+    "name:id": "Koki",
+    "name:ja": "幸喜",
+    "name:ja-Hira": "こうき",
+    "official_name": "字幸喜",
+    "place": "quarter"
+  }
+}
+
+  ]
+}
