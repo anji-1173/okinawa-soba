@@ -1,0 +1,12 @@
+=== 沖縄県名護市幸喜111-1
+[{"geometry":{"coordinates":[127.95919,26.532351],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県名護市幸喜"}}]
+=== 沖縄県名護市幸喜111
+[{"geometry":{"coordinates":[127.95919,26.532351],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県名護市幸喜"}}]
+=== 名護市幸喜111
+[{"geometry":{"coordinates":[127.95919,26.532351],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県名護市幸喜"}}]
+=== 沖縄県名護市字幸喜111番地
+[{"geometry":{"coordinates":[127.95919,26.532351],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県名護市幸喜"}}]
+=== 沖縄県沖縄市中央2-7-46
+[{"geometry":{"coordinates":[127.799774,26.339359],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県沖縄市中央二丁目７番４６号"}}]
+=== 沖縄県沖縄市中央2丁目
+[{"geometry":{"coordinates":[127.798378,26.33975],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県沖縄市中央二丁目"}}]
