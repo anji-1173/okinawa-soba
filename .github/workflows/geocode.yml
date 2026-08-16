@@ -1,0 +1,27 @@
+name: geocode
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  geo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: q
+        run: |
+          for q in "沖縄県那覇市鏡水150" "沖縄県那覇市鏡水"; do
+            echo "=== $q" >> out.txt
+            curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$q")" >> out.txt
+            echo "" >> out.txt
+          done
+          UA="okinawa-soba-blog/1.0"
+          QL='[out:json][timeout:90];nwr["name"~"那覇空港|国内線旅客ターミナル"](26.19,127.63,26.22,127.66);out center tags;'
+          curl -s -A "$UA" -X POST --data "data=$(python3 -c "import urllib.parse;print(urllib.parse.quote('''[out:json][timeout:90];nwr[\"aeroway\"=\"terminal\"](26.18,127.63,26.22,127.67);out center tags;'''))")" https://overpass-api.de/api/interpreter > term.json
+          cat out.txt; head -c 1500 term.json
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add out.txt term.json
+          git commit -m "naha airport geocode [skip ci]"
+          git push
