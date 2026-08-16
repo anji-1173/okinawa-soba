@@ -1,0 +1,54 @@
+name: geocode
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  geo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: geocode all pins via GSI
+        run: |
+          python3 - <<'PY'
+          import json, urllib.parse, urllib.request, re, time
+          pins = json.load(open('pins.json'))
+          out = []
+          def clean(a):
+              # 括弧内の補足を除去し、末尾の枝番も残したまま問い合わせる
+              a = re.sub(r'[（(].*?[）)]', '', a).strip()
+              return a
+          def q(addr):
+              url = "https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + urllib.parse.quote(addr)
+              try:
+                  with urllib.request.urlopen(url, timeout=20) as r:
+                      return json.loads(r.read().decode())
+              except Exception as e:
+                  return {"error": str(e)}
+          for i, p in enumerate(pins):
+              a = clean(p['addr'] or '')
+              cands = []
+              tries = [a]
+              # 枝番を削って字レベルまで段階的に短くしたものも試す
+              m = re.match(r'^(.*?[市町村].*?)([0-9０-９].*)$', a)
+              if m: tries.append(m.group(1))
+              for t in dict.fromkeys(tries):
+                  if not t: continue
+                  r = q('沖縄県' + t if not t.startswith('沖縄県') else t)
+                  if isinstance(r, list) and r:
+                      for f in r[:3]:
+                          cands.append({'query': t, 'title': f['properties']['title'],
+                                        'lng': f['geometry']['coordinates'][0],
+                                        'lat': f['geometry']['coordinates'][1]})
+                  time.sleep(0.15)
+              out.append({'name': p['name'], 'addr': p['addr'], 'lat': p['lat'], 'lng': p['lng'], 'cands': cands})
+              if i % 25 == 0: print(i, p['name'], len(cands), flush=True)
+          json.dump(out, open('geo_result.json','w'), ensure_ascii=False, indent=1)
+          print('done', len(out))
+          PY
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add geo_result.json
+          git commit -m "geocode all pins [skip ci]"
+          git push
