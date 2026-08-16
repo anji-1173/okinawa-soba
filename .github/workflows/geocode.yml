@@ -7,56 +7,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: round3
+      - name: round4
         run: |
           python3 - <<'PY'
           import json, urllib.parse, urllib.request, time
           UA='okinawa-soba-blog/1.0'
-          def get(u,d=None):
-              r=urllib.request.Request(u,data=d,headers={'User-Agent':UA})
+          def ov(ql):
+              r=urllib.request.Request('https://overpass-api.de/api/interpreter',
+                    data=('data='+urllib.parse.quote(ql)).encode(), headers={'User-Agent':UA})
               try:
-                  with urllib.request.urlopen(r,timeout=90) as x: return x.read().decode()
-              except Exception as e: return json.dumps({'error':str(e)})
-          out={'gsi':[], 'osm':{}}
-          # 伊豆味・奥間・真喜屋の番地をいくつか引いて基準点を作る
-          qs=[]
-          for b in [70,300,500,743,1000,1480,1800,2200,2662]: qs.append('沖縄県本部町伊豆味%d'%b)
-          for b in [1500,1605,1700,1900]: qs.append('沖縄県国頭村奥間%d'%b)
-          for b in [700,763,800,900]: qs.append('沖縄県名護市真喜屋%d'%b)
-          for b in [2700,2795,2900]: qs.append('沖縄県本部町崎本部%d'%b)
-          for q in qs:
-              try:
-                  r=json.loads(get("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+urllib.parse.quote(q)))
-                  if isinstance(r,list) and r:
-                      f=r[0]
-                      out['gsi'].append({'q':q,'title':f['properties']['title'],
-                                         'lat':f['geometry']['coordinates'][1],'lng':f['geometry']['coordinates'][0]})
-              except Exception: pass
-              time.sleep(0.12)
-          # 該当エリアの飲食店をOSMから
-          boxes={'izumi':'26.630,127.930,26.670,127.975','okuma':'26.720,128.100,26.760,128.200',
-                 'makiya':'26.615,128.000,26.660,128.060','sakimotobu':'26.630,127.860,26.665,127.905',
-                 'kaiyohaku':'26.680,127.860,26.705,127.900','oura':'26.545,128.070,26.575,128.110'}
-          for k,b in boxes.items():
-              ql='[out:json][timeout:90];nwr["amenity"~"restaurant|cafe|fast_food"](%s);out center tags;'%b
-              o=get('https://overpass-api.de/api/interpreter',('data='+urllib.parse.quote(ql)).encode())
-              try:
-                  j=json.loads(o); res=[]
-                  for e in j.get('elements',[]):
-                      t=e.get('tags',{})
-                      if not t.get('name'): continue
-                      res.append({'name':t['name'],'lat':e.get('lat') or e.get('center',{}).get('lat'),
-                                  'lng':e.get('lon') or e.get('center',{}).get('lng') or e.get('center',{}).get('lon')})
-                  out['osm'][k]=res
-              except Exception as e: out['osm'][k]=[{'error':str(e)}]
-              time.sleep(2)
-          json.dump(out, open('geo_round3.json','w'), ensure_ascii=False, indent=1)
-          print('done')
+                  with urllib.request.urlopen(r,timeout=120) as x: return json.loads(x.read().decode())
+              except Exception as e: return {'error':str(e)}
+          out={}
+          Q={
+           'izumi_all':'[out:json][timeout:120];nwr(26.630,127.925,26.672,127.980)["name"];out center tags;',
+           'byname':'[out:json][timeout:120];nwr["name"~"森の家|伊豆味そば|シーサー園|伊豆味小中|そば屋さん|わぁ|我那覇"](26.0,127.5,26.95,128.4);out center tags;',
+           'motobu_soba':'[out:json][timeout:120];nwr["amenity"~"restaurant|cafe"](26.675,127.855,26.710,127.905);out center tags;',
+           'makiya2':'[out:json][timeout:120];nwr(26.600,127.995,26.665,128.070)["name"];out center tags;',
+           'okuma2':'[out:json][timeout:120];nwr(26.715,128.145,26.755,128.215)["name"];out center tags;',
+          }
+          for k,ql in Q.items():
+              j=ov(ql); res=[]
+              for e in j.get('elements',[]):
+                  t=e.get('tags',{})
+                  if not t.get('name'): continue
+                  res.append({'name':t['name'],'lat':e.get('lat') or e.get('center',{}).get('lat'),
+                              'lng':e.get('lon') or e.get('center',{}).get('lon'),
+                              'k':t.get('amenity') or t.get('shop') or t.get('tourism') or t.get('place') or t.get('highway') or t.get('amenity') or ''})
+              out[k]=res if res else j
+              print(k, len(res), flush=True); time.sleep(3)
+          json.dump(out, open('geo_round4.json','w'), ensure_ascii=False, indent=1)
           PY
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
-          git add geo_round3.json
-          git commit -m "geocode round3 [skip ci]"
+          git add geo_round4.json
+          git commit -m "geocode round4 [skip ci]"
           git push
