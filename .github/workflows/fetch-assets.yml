@@ -1,0 +1,25 @@
+name: fetch-issue-assets
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download issue attachments
+        run: |
+          mkdir -p incoming
+          i=1
+          for u in 5987741b-8409-4d6c-b5fb-f273d2db008c c6612b3e-396c-47fb-9d89-7cf7ee261cd0 a7e40b87-c817-4556-91ab-e39cf72b5996 a707314e-e0fb-40c4-89d1-8850b091b56f 8f239bd8-d793-45b1-a2d4-1d31fb182100 756bc307-b5df-4428-8741-e0163dcca8f5 da0ca028-a0f1-4789-bf93-84055bc9a6c0; do
+            curl -sL "https://github.com/user-attachments/assets/$u" -o incoming/$(printf %02d $i).jpg
+            i=$((i+1))
+          done
+          file incoming/*
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add incoming
+          git commit -m "琉風写真をIssue#5から取り込み [skip ci]"
+          git push
