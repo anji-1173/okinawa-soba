@@ -1,0 +1,254 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-08-16T07:11:01Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 1068013188,
+  "lat": 26.5401900,
+  "lon": 127.9506600,
+  "tags": {
+    "KSJ2:AAC": "47209",
+    "KSJ2:AAC_V": "沖縄県名護市",
+    "KSJ2:APF": "3",
+    "KSJ2:APF_V": "市区町村",
+    "KSJ2:PCA": "16",
+    "KSJ2:PCA_V": "学校",
+    "KSJ2:PCI": "16001",
+    "KSJ2:PCI_V": "小学校",
+    "KSJ2:RCN": "数値地図",
+    "addr:street": "字幸喜4-1",
+    "amenity": "school",
+    "isced:level": "1",
+    "name": "名護市立瀬喜田小学校",
+    "name:en": "Nago City Sekita Elementary School",
+    "name:ja": "名護市立 瀬喜田小学校",
+    "note": "National-Land Numerical Information 2006, MLIT Japan",
+    "note:ja": "国土数値情報(河川データ)平成18年国土交通省",
+    "school": "primary",
+    "source": "MLIT Japan",
+    "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+    "wikidata": "Q93216681"
+  }
+},
+{
+  "type": "node",
+  "id": 1068042673,
+  "lat": 26.5399538,
+  "lon": 127.9503830,
+  "tags": {
+    "KSJ2:AAC": "47209",
+    "KSJ2:AAC_V": "沖縄県名護市",
+    "KSJ2:APF": "3",
+    "KSJ2:APF_V": "市区町村",
+    "KSJ2:PCA": "16",
+    "KSJ2:PCA_V": "学校",
+    "KSJ2:PCI": "16011",
+    "KSJ2:PCI_V": "幼稚園",
+    "KSJ2:RCN": "数値地図画像",
+    "addr:street": "字幸喜4",
+    "amenity": "kindergarten",
+    "name": "名護市立瀬喜田幼稚園",
+    "name:en": "Nago City Sekita Kindergarten",
+    "name:ja": "瀬喜田幼稚園",
+    "note": "National-Land Numerical Information 2006, MLIT Japan",
+    "note:ja": "国土数値情報(河川データ)平成18年国土交通省",
+    "source": "MLIT Japan",
+    "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+  }
+},
+{
+  "type": "node",
+  "id": 1993186227,
+  "lat": 26.5413970,
+  "lon": 127.9514408,
+  "tags": {
+    "addr:street": "国道58号",
+    "amenity": "fuel",
+    "brand": "JA",
+    "name": "JA-SS",
+    "name:en": "JA Nago Service Station",
+    "name:ja": "JA名護給油所",
+    "name:ja_rm": "Jeiei EsuEsu",
+    "operator": "ＪＡおきなわ名護給油所",
+    "source": "survey",
+    "survey:date": "2012-10-01"
+  }
+},
+{
+  "type": "node",
+  "id": 1993467299,
+  "lat": 26.5407050,
+  "lon": 127.9501315,
+  "tags": {
+    "amenity": "toilets",
+    "fee": "no",
+    "source": "survey",
+    "survey:date": "2012-10-01"
+  }
+},
+{
+  "type": "way",
+  "id": 454171288,
+  "center": {
+    "lat": 26.5391134,
+    "lon": 127.9496427
+  },
+  "nodes": [
+    4507758874,
+    4507758871,
+    4507758872,
+    4507758873,
+    4507758874
+  ],
+  "tags": {
+    "amenity": "restaurant",
+    "building": "yes",
+    "name": "コロンバン",
+    "source": "GSImaps/std"
+  }
+},
+{
+  "type": "way",
+  "id": 454171292,
+  "center": {
+    "lat": 26.5389251,
+    "lon": 127.9509767
+  },
+  "nodes": [
+    4507758878,
+    4507758875,
+    4507758876,
+    4507758877,
+    4507758878
+  ],
+  "tags": {
+    "amenity": "community_centre",
+    "building": "yes",
+    "name": "幸喜区公民館",
+    "name:en": "Kokiku Public Hall",
+    "source": "GSImaps/std"
+  }
+},
+{
+  "type": "way",
+  "id": 454184903,
+  "center": {
+    "lat": 26.5383952,
+    "lon": 127.9487928
+  },
+  "nodes": [
+    4507841261,
+    4507841260,
+    4507841259,
+    4507841258,
+    4507841261
+  ],
+  "tags": {
+    "amenity": "restaurant",
+    "building": "yes",
+    "source": "GSImaps/std"
+  }
+},
+{
+  "type": "way",
+  "id": 454770289,
+  "center": {
+    "lat": 26.5398049,
+    "lon": 127.9507284
+  },
+  "nodes": [
+    4512940130,
+    4512940129,
+    4512940128,
+    4512940127,
+    4512940130
+  ],
+  "tags": {
+    "amenity": "restaurant",
+    "building": "yes",
+    "cuisine": "noodle",
+    "name": "そばや13番地",
+    "source": "GSImaps/std"
+  }
+},
+{
+  "type": "way",
+  "id": 454770301,
+  "center": {
+    "lat": 26.5393783,
+    "lon": 127.9498248
+  },
+  "nodes": [
+    4512940178,
+    4512940177,
+    4512940176,
+    4512940175,
+    4512940178
+  ],
+  "tags": {
+    "amenity": "restaurant",
+    "building": "yes",
+    "cuisine": "barbecue",
+    "name": "おばぁの家",
+    "source": "GSImaps/std"
+  }
+},
+{
+  "type": "way",
+  "id": 1135812596,
+  "center": {
+    "lat": 26.5384900,
+    "lon": 127.9490458
+  },
+  "nodes": [
+    10587832158,
+    10587832159,
+    10587832160,
+    10587832161,
+    10587832162,
+    10587832163,
+    10587832158
+  ],
+  "tags": {
+    "amenity": "restaurant",
+    "building": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 1135813643,
+  "center": {
+    "lat": 26.5379613,
+    "lon": 127.9472108
+  },
+  "nodes": [
+    10587831045,
+    10587831046,
+    10587831047,
+    10587831048,
+    10587831049,
+    10587831050,
+    10587831051,
+    10587831052,
+    10587831053,
+    10587831054,
+    10587831055,
+    10587831056,
+    10587831057,
+    10587831058,
+    10587831063,
+    10587831045
+  ],
+  "tags": {
+    "amenity": "parking"
+  }
+}
+
+  ]
+}
