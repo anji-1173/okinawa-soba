@@ -9,36 +9,41 @@ jobs:
       - uses: actions/checkout@v4
       - name: query
         run: |
-          mkdir -p geoout
-          UA="okinawa-soba-blog/1.0 (github actions)"
-          # 1) Nominatim で店名・住所検索
-          for q in "美ら花 別邸" "美ら花+名護市幸喜" "沖縄県名護市幸喜111-1" "幸喜公園 名護市"; do
-            echo "=== $q" >> geoout/nominatim.txt
-            curl -s -A "$UA" "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=jp&q=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$q")" >> geoout/nominatim.txt
-            echo "" >> geoout/nominatim.txt
-            sleep 2
+          rm -rf geoout && mkdir -p geoout
+          enc(){ python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$1"; }
+          for q in "沖縄県名護市幸喜111-1" "沖縄県名護市幸喜111" "名護市幸喜111" "沖縄県名護市字幸喜111番地" "沖縄県沖縄市中央2-7-46" "沖縄県沖縄市中央2丁目" ; do
+            echo "=== $q" >> geoout/gsi.txt
+            curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=$(enc "$q")" >> geoout/gsi.txt
+            echo "" >> geoout/gsi.txt
           done
-          # 2) Overpass で幸喜周辺の飲食店・国道58号ノードを取得
+          UA="okinawa-soba-blog/1.0"
           cat > q.ql <<'EOQ'
-          [out:json][timeout:60];
+          [out:json][timeout:90];
           (
-            node["name"~"美ら花"](26.50,127.90,26.58,128.00);
-            way["name"~"美ら花"](26.50,127.90,26.58,128.00);
-            node["amenity"="restaurant"](26.525,127.945,26.545,127.980);
-            node["name"~"幸喜"](26.520,127.940,26.550,127.985);
+            nwr["name"~"美ら花|ちゅら花"](26.50,127.90,26.60,128.02);
+            nwr["amenity"~"restaurant|cafe|fast_food"](26.532,127.940,26.548,127.960);
+            nwr["leisure"="park"](26.530,127.940,26.548,127.960);
+            nwr["name"~"幸喜"](26.520,127.930,26.560,127.990);
+            nwr["highway"="bus_stop"](26.530,127.940,26.548,127.965);
           );
           out center;
           EOQ
-          curl -s -A "$UA" --data-binary @q.ql https://overpass-api.de/api/interpreter > geoout/overpass.json
-          # 3) 国土地理院 住所検索API
-          curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=%E6%B2%96%E7%B8%84%E7%9C%8C%E5%90%8D%E8%AD%B7%E5%B8%82%E5%B9%B8%E5%96%9C" > geoout/gsi_koki.json
-          curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=%E6%B2%96%E7%B8%84%E7%9C%8C%E6%B2%96%E7%B8%84%E5%B8%82%E4%B8%AD%E5%A4%AE1-2-3" > geoout/gsi_796.json
-          curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=%E6%B2%96%E7%B8%84%E7%9C%8C%E7%B3%B8%E6%BA%80%E5%B8%82%E5%BA%A7%E6%B3%A21813" > geoout/gsi_harunchu.json
+          curl -s -A "$UA" --data-binary @q.ql https://overpass-api.de/api/interpreter > geoout/overpass_koki.json
+          cat > q2.ql <<'EOQ'
+          [out:json][timeout:90];
+          (
+            nwr["name"~"鉢巻|はちまき|侍"](26.325,127.790,26.350,127.810);
+            nwr["name"~"パークアベニュー|一番街"](26.325,127.790,26.350,127.810);
+            nwr["name"~"796|ナンクル"](26.325,127.790,26.350,127.810);
+          );
+          out center;
+          EOQ
+          curl -s -A "$UA" --data-binary @q2.ql https://overpass-api.de/api/interpreter > geoout/overpass_koza.json
           wc -c geoout/*
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
-          git add geoout
-          git commit -m "geocode results [skip ci]"
+          git add -A geoout
+          git commit -m "geocode results 2 [skip ci]"
           git push
