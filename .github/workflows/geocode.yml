@@ -10,40 +10,32 @@ jobs:
       - name: query
         run: |
           rm -rf geoout && mkdir -p geoout
-          enc(){ python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$1"; }
-          for q in "沖縄県名護市幸喜111-1" "沖縄県名護市幸喜111" "名護市幸喜111" "沖縄県名護市字幸喜111番地" "沖縄県沖縄市中央2-7-46" "沖縄県沖縄市中央2丁目" ; do
-            echo "=== $q" >> geoout/gsi.txt
-            curl -s "https://msearch.gsi.go.jp/address-search/AddressSearch?q=$(enc "$q")" >> geoout/gsi.txt
-            echo "" >> geoout/gsi.txt
+          UA="okinawa-soba-blog/1.0 (contact: anji_uchima@yahoo.co.jp)"
+          run_ql () {
+            local name="$1"; local ql="$2"
+            python3 - "$ql" > body.txt <<'PY'
+          import sys,urllib.parse
+          print("data="+urllib.parse.quote(sys.argv[1]))
+          PY
+            curl -s -A "$UA" -X POST --data @body.txt https://overpass-api.de/api/interpreter > geoout/$name.json
+            head -c 120 geoout/$name.json; echo " <- $name"
+          }
+          run_ql churahana '[out:json][timeout:90];nwr["name"~"美ら花"](26.0,127.5,26.9,128.4);out center;'
+          run_ql koki '[out:json][timeout:90];nwr(26.534,127.940,26.546,127.960)["amenity"];out center;'
+          run_ql kokipark '[out:json][timeout:90];nwr["name"~"幸喜"](26.52,127.93,26.56,127.99);out center;'
+          run_ql koza '[out:json][timeout:90];nwr["name"~"鉢巻|はちまき|ナンクル|796"](26.32,127.78,26.36,127.82);out center;'
+          # Nominatim（間隔を空ける）
+          for q in "美ら花別邸" "美ら花 名護" "幸喜公園 名護市"; do
+            echo "=== $q" >> geoout/nominatim.txt
+            curl -s -A "$UA" "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$q")" >> geoout/nominatim.txt
+            echo "" >> geoout/nominatim.txt
+            sleep 3
           done
-          UA="okinawa-soba-blog/1.0"
-          cat > q.ql <<'EOQ'
-          [out:json][timeout:90];
-          (
-            nwr["name"~"美ら花|ちゅら花"](26.50,127.90,26.60,128.02);
-            nwr["amenity"~"restaurant|cafe|fast_food"](26.532,127.940,26.548,127.960);
-            nwr["leisure"="park"](26.530,127.940,26.548,127.960);
-            nwr["name"~"幸喜"](26.520,127.930,26.560,127.990);
-            nwr["highway"="bus_stop"](26.530,127.940,26.548,127.965);
-          );
-          out center;
-          EOQ
-          curl -s -A "$UA" --data-binary @q.ql https://overpass-api.de/api/interpreter > geoout/overpass_koki.json
-          cat > q2.ql <<'EOQ'
-          [out:json][timeout:90];
-          (
-            nwr["name"~"鉢巻|はちまき|侍"](26.325,127.790,26.350,127.810);
-            nwr["name"~"パークアベニュー|一番街"](26.325,127.790,26.350,127.810);
-            nwr["name"~"796|ナンクル"](26.325,127.790,26.350,127.810);
-          );
-          out center;
-          EOQ
-          curl -s -A "$UA" --data-binary @q2.ql https://overpass-api.de/api/interpreter > geoout/overpass_koza.json
           wc -c geoout/*
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
           git add -A geoout
-          git commit -m "geocode results 2 [skip ci]"
+          git commit -m "geocode results 3 [skip ci]"
           git push
