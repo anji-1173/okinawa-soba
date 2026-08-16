@@ -7,66 +7,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: resolve remaining
+      - name: round3
         run: |
           python3 - <<'PY'
-          import json, re, time, urllib.parse, urllib.request
-          items = json.load(open('unresolved.json'))
-          UA = 'okinawa-soba-blog/1.0'
-          def get(url, data=None):
-              req = urllib.request.Request(url, data=data, headers={'User-Agent': UA})
+          import json, urllib.parse, urllib.request, time
+          UA='okinawa-soba-blog/1.0'
+          def get(u,d=None):
+              r=urllib.request.Request(u,data=d,headers={'User-Agent':UA})
               try:
-                  with urllib.request.urlopen(req, timeout=60) as r:
-                      return r.read().decode()
-              except Exception as e:
-                  return json.dumps({'error': str(e)})
-          def gsi(a):
+                  with urllib.request.urlopen(r,timeout=90) as x: return x.read().decode()
+              except Exception as e: return json.dumps({'error':str(e)})
+          out={'gsi':[], 'osm':{}}
+          # 伊豆味・奥間・真喜屋の番地をいくつか引いて基準点を作る
+          qs=[]
+          for b in [70,300,500,743,1000,1480,1800,2200,2662]: qs.append('沖縄県本部町伊豆味%d'%b)
+          for b in [1500,1605,1700,1900]: qs.append('沖縄県国頭村奥間%d'%b)
+          for b in [700,763,800,900]: qs.append('沖縄県名護市真喜屋%d'%b)
+          for b in [2700,2795,2900]: qs.append('沖縄県本部町崎本部%d'%b)
+          for q in qs:
               try:
-                  return json.loads(get("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+urllib.parse.quote(a)))
-              except Exception:
-                  return []
-          out = []
-          for name, addr in items:
-              rec = {'name': name, 'addr': addr, 'gsi': [], 'osm': []}
-              a = re.sub(r'[（(].*?[）)]', '', addr or '').strip()
-              a = re.sub(r'\s+.*$', '', a)
-              variants = [a, a.replace('字',''), re.sub(r'[-‐−]\d+$', '', a),
-                          re.sub(r'([0-9]+)[-‐−][0-9]+$', r'\1', a.replace('字','')),
-                          re.sub(r'(富着)', '冨着', a), re.sub(r'(冨着)', '富着', a)]
-              for v in dict.fromkeys([x for x in variants if x]):
-                  r = gsi('沖縄県'+v if not v.startswith('沖縄県') else v)
-                  if isinstance(r, list):
-                      for f in r[:2]:
-                          rec['gsi'].append({'q': v, 'title': f['properties']['title'],
-                                             'lat': f['geometry']['coordinates'][1],
-                                             'lng': f['geometry']['coordinates'][0]})
-                  time.sleep(0.12)
-              # OSM 店名検索（沖縄本島全域）
-              nm = re.sub(r'[（(].*?[）)]', '', name).strip()
-              nm = re.sub(r'[　\s]+', '', nm)
-              key = nm[:6]
-              ql = '[out:json][timeout:60];nwr["name"~"%s"](26.0,127.5,26.95,128.4);out center tags;' % re.escape(key).replace('\\','')
-              body = ('data='+urllib.parse.quote(ql)).encode()
+                  r=json.loads(get("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+urllib.parse.quote(q)))
+                  if isinstance(r,list) and r:
+                      f=r[0]
+                      out['gsi'].append({'q':q,'title':f['properties']['title'],
+                                         'lat':f['geometry']['coordinates'][1],'lng':f['geometry']['coordinates'][0]})
+              except Exception: pass
+              time.sleep(0.12)
+          # 該当エリアの飲食店をOSMから
+          boxes={'izumi':'26.630,127.930,26.670,127.975','okuma':'26.720,128.100,26.760,128.200',
+                 'makiya':'26.615,128.000,26.660,128.060','sakimotobu':'26.630,127.860,26.665,127.905',
+                 'kaiyohaku':'26.680,127.860,26.705,127.900','oura':'26.545,128.070,26.575,128.110'}
+          for k,b in boxes.items():
+              ql='[out:json][timeout:90];nwr["amenity"~"restaurant|cafe|fast_food"](%s);out center tags;'%b
+              o=get('https://overpass-api.de/api/interpreter',('data='+urllib.parse.quote(ql)).encode())
               try:
-                  o = json.loads(get('https://overpass-api.de/api/interpreter', body))
-                  for e in o.get('elements', [])[:6]:
-                      lat = e.get('lat') or e.get('center', {}).get('lat')
-                      lng = e.get('lon') or e.get('center', {}).get('lon')
-                      t = e.get('tags', {})
-                      rec['osm'].append({'name': t.get('name'), 'lat': lat, 'lng': lng,
-                                         'addr': t.get('addr:full') or t.get('addr:housenumber'),
-                                         'amenity': t.get('amenity')})
-              except Exception as e:
-                  rec['osm_err'] = str(e)
-              time.sleep(1.2)
-              out.append(rec)
-              print(name, len(rec['gsi']), len(rec['osm']), flush=True)
-          json.dump(out, open('geo_round2.json','w'), ensure_ascii=False, indent=1)
+                  j=json.loads(o); res=[]
+                  for e in j.get('elements',[]):
+                      t=e.get('tags',{})
+                      if not t.get('name'): continue
+                      res.append({'name':t['name'],'lat':e.get('lat') or e.get('center',{}).get('lat'),
+                                  'lng':e.get('lon') or e.get('center',{}).get('lng') or e.get('center',{}).get('lon')})
+                  out['osm'][k]=res
+              except Exception as e: out['osm'][k]=[{'error':str(e)}]
+              time.sleep(2)
+          json.dump(out, open('geo_round3.json','w'), ensure_ascii=False, indent=1)
+          print('done')
           PY
       - name: commit
         run: |
           git config user.name github-actions
           git config user.email actions@users.noreply.github.com
-          git add geo_round2.json
-          git commit -m "geocode round2 [skip ci]"
+          git add geo_round3.json
+          git commit -m "geocode round3 [skip ci]"
           git push
