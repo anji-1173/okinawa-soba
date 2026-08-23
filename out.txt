@@ -1,0 +1,4 @@
+=== 沖縄県沖縄市東1-23-12
+[{"geometry":{"coordinates":[127.820587,26.343382],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県沖縄市東一丁目２３番１２号"}}]
+=== 沖縄県沖縄市東1-23
+[{"geometry":{"coordinates":[127.820892,26.34313],"type":"Point"},"type":"Feature","properties":{"addressCode":"","title":"沖縄県沖縄市東一丁目２３番"}}]
