@@ -1,85 +1,24 @@
 {
- "food": [
+ "nominatim": [
   {
-   "name": "Eagle",
-   "lat": 26.508385,
-   "lng": 127.8672857,
-   "k": "cafe"
+   "q": "花村そば 恩納村",
+   "result": "none"
   },
   {
-   "name": "美ら海カフェ",
-   "lat": 26.5064722,
-   "lng": 127.878576,
-   "k": "cafe"
+   "q": "沖縄県国頭郡恩納村瀬良垣1063-1",
+   "result": "none"
   },
   {
-   "name": "Bbq Hamaashibi",
-   "lat": 26.506439,
-   "lng": 127.8788028,
-   "k": "restaurant"
+   "q": "沖縄県国頭郡恩納村瀬良垣1063",
+   "result": "none"
   },
   {
-   "name": "Hawaiian Pancake House",
-   "lat": 26.5089091,
-   "lng": 127.8720982,
-   "k": "restaurant"
+   "q": "瀬良垣ビーチ 恩納村",
+   "result": "none"
   },
   {
-   "name": null,
-   "lat": 26.5069376,
-   "lng": 127.8757722,
-   "k": "restaurant"
-  },
-  {
-   "name": "なかむらそば",
-   "lat": 26.5067901,
-   "lng": 127.8654832,
-   "k": "restaurant"
-  },
-  {
-   "name": "Warren and JJ place, YanaAmerica",
-   "lat": 26.5068638,
-   "lng": 127.8755325,
-   "k": "restaurant"
-  },
-  {
-   "name": "Yakiniku Dre x Dre",
-   "lat": 26.5085302,
-   "lng": 127.8675866,
-   "k": "restaurant"
-  },
-  {
-   "name": null,
-   "lat": 26.5013295,
-   "lng": 127.8599622,
-   "k": "restaurant"
-  }
- ],
- "conv": [
-  {
-   "name": "ビーチショップ",
-   "lat": 26.505294,
-   "lng": 127.859632,
-   "k": "convenience"
-  },
-  {
-   "name": "ココストア",
-   "lat": 26.5014924,
-   "lng": 127.8596426,
-   "k": "convenience"
-  }
- ],
- "hana": [
-  {
-   "name": "なかむらそば",
-   "lat": 26.5067901,
-   "lng": 127.8654832,
-   "k": "restaurant"
-  }
- ],
- "beach": [
-  {
-   "error": "HTTP Error 429: Too Many Requests"
+   "q": "Family Mart 瀬良垣",
+   "result": "none"
   }
  ]
 }
