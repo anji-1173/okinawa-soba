@@ -1,0 +1,110 @@
+{
+ "gsi": [
+  {
+   "q": "沖縄県恩納村瀬良垣1063",
+   "title": "沖縄県恩納村瀬良垣",
+   "lat": 26.494987,
+   "lng": 127.8731
+  },
+  {
+   "q": "沖縄県恩納村瀬良垣1062",
+   "title": "沖縄県恩納村瀬良垣",
+   "lat": 26.494987,
+   "lng": 127.8731
+  },
+  {
+   "q": "沖縄県金武町伊芸1264",
+   "title": "沖縄県金武町伊芸",
+   "lat": 26.46459,
+   "lng": 127.883301
+  },
+  {
+   "q": "沖縄県金武町伊芸",
+   "title": "沖縄県金武町伊芸",
+   "lat": 26.46459,
+   "lng": 127.883301
+  }
+ ],
+ "osm": [
+  {
+   "tag": "igei",
+   "name": "伊芸SA (上り)",
+   "lat": 26.4595651,
+   "lng": 127.8712019,
+   "hw": "services",
+   "amenity": null
+  },
+  {
+   "tag": "igei",
+   "name": "伊芸SA (下り)",
+   "lat": 26.460879,
+   "lng": 127.870784,
+   "hw": "services",
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸SA",
+   "lat": 26.4597606,
+   "lng": 127.8668591,
+   "hw": "motorway_junction",
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸S,A,物見台",
+   "lat": 26.459135,
+   "lng": 127.8715977,
+   "hw": null,
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸SA",
+   "lat": 26.4609238,
+   "lng": 127.8747717,
+   "hw": "motorway_junction",
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸ビーチ",
+   "lat": 26.4556601,
+   "lng": 127.8799819,
+   "hw": null,
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸",
+   "lat": 26.4588171,
+   "lng": 127.8801405,
+   "hw": null,
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸SA (上り)",
+   "lat": 26.4595651,
+   "lng": 127.8712019,
+   "hw": "services",
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸海浜公園",
+   "lat": 26.4556721,
+   "lng": 127.8804082,
+   "hw": null,
+   "amenity": null
+  },
+  {
+   "tag": "igei_name",
+   "name": "伊芸SA (下り)",
+   "lat": 26.460879,
+   "lng": 127.870784,
+   "hw": "services",
+   "amenity": null
+  }
+ ]
+}
