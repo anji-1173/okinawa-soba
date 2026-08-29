@@ -1,0 +1,52 @@
+name: geocode
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  geo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: query
+        run: |
+          python3 - <<'PY'
+          import json, urllib.parse, urllib.request, time
+          UA="okinawa-soba-blog/1.0"
+          def get(url,data=None):
+              req=urllib.request.Request(url,data=data,headers={"User-Agent":UA})
+              with urllib.request.urlopen(req,timeout=90) as r: return r.read().decode()
+          out={"gsi":[],"osm":[]}
+          for q in ["沖縄県恩納村瀬良垣1063","沖縄県恩納村瀬良垣1062","沖縄県金武町伊芸1264","沖縄県金武町伊芸"]:
+              try:
+                  r=json.loads(get("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+urllib.parse.quote(q)))
+                  for f in r[:3]:
+                      out["gsi"].append({"q":q,"title":f["properties"]["title"],
+                        "lat":f["geometry"]["coordinates"][1],"lng":f["geometry"]["coordinates"][0]})
+              except Exception as e: out["gsi"].append({"q":q,"error":str(e)})
+              time.sleep(0.2)
+          # OSM: 花村そば（恩納村・店名）／伊芸SA（highway=services 面）
+          for tag,ql in [
+            ("hanamura",'[out:json][timeout:90];nwr["name"~"花村"](26.46,127.83,26.55,127.92);out center tags;'),
+            ("igei",'[out:json][timeout:90];nwr["highway"="services"](26.40,127.83,26.50,127.94);out center tags;'),
+            ("igei_name",'[out:json][timeout:90];nwr["name"~"伊芸"](26.40,127.83,26.50,127.94);out center tags;'),
+          ]:
+              try:
+                  j=json.loads(get("https://overpass-api.de/api/interpreter",("data="+urllib.parse.quote(ql)).encode()))
+                  for e in j.get("elements",[]):
+                      t=e.get("tags",{})
+                      out["osm"].append({"tag":tag,"name":t.get("name"),
+                        "lat":e.get("lat") or e.get("center",{}).get("lat"),
+                        "lng":e.get("lon") or e.get("center",{}).get("lon"),
+                        "hw":t.get("highway"),"amenity":t.get("amenity")})
+              except Exception as e: out["osm"].append({"tag":tag,"error":str(e)})
+              time.sleep(2)
+          json.dump(out,open("geo_result.json","w"),ensure_ascii=False,indent=1)
+          print("done")
+          PY
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add geo_result.json
+          git commit -m "geocode 花村/伊芸 [skip ci]"
+          git push
