@@ -1,0 +1,45 @@
+name: fetch-zip
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download and extract (names recorded, no execution)
+        run: |
+          mkdir -p zipwork zipout
+          curl -sL "https://github.com/user-attachments/files/33920787/x77.zip" -o zipwork/a.zip
+          ls -la zipwork
+          python3 -I - <<'PY'
+          import zipfile, json, os
+          z = zipfile.ZipFile('zipwork/a.zip')
+          out = []
+          k = 0
+          for info in z.infolist():
+              raw = info.filename
+              if info.flag_bits & 0x800:
+                  name = raw
+              else:
+                  try: name = raw.encode('cp437').decode('cp932')
+                  except Exception: name = raw
+              if info.is_dir(): continue
+              base = name.replace('\\','/').split('/')[-1]
+              if not base.lower().endswith(('.jpg','.jpeg','.png','.heic')): 
+                  out.append({'skip': name}); continue
+              k += 1
+              safe = 'z%02d%s' % (k, os.path.splitext(base)[1].lower())
+              with open('zipout/'+safe,'wb') as f: f.write(z.read(info))
+              out.append({'safe': safe, 'original': name, 'size': info.file_size})
+          json.dump(out, open('zipout/names.json','w'), ensure_ascii=False, indent=1)
+          print(json.dumps(out, ensure_ascii=False, indent=1))
+          PY
+          rm -rf zipwork
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add zipout
+          git commit -m "zip展開 [skip ci]"
+          git push
