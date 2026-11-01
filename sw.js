@@ -1,7 +1,7 @@
 // 沖縄そば巡りの旅 — Service Worker（ネットワーク優先）
 // バージョンを上げると新SWとして再インストールされ、古いキャッシュを掃除する。
 // デプロイのたびに CACHE_VERSION を更新する（自動更新スクリプトが差し替える）。
-const CACHE_VERSION = '2026.09.18.1';
+const CACHE_VERSION = '2026.11.01.1';
 const CACHE = 'okinawa-soba-' + CACHE_VERSION;
 
 self.addEventListener('install', (e) => {
@@ -24,6 +24,8 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // 外部（フォント等）はそのまま
+  // 動画（Range要求）はSWを通さずブラウザに任せる（iPhoneでの再生のため）
+  if (req.headers.has('range') || /\.(mp4|mov|webm)$/i.test(url.pathname)) return;
   e.respondWith((async () => {
     try {
       const fresh = await fetch(req);
