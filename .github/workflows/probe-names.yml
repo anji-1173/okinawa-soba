@@ -1,0 +1,47 @@
+name: i18n-probe
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: test translation on live site
+        run: |
+          for i in $(seq 1 40); do curl -s https://anji-1173.github.io/okinawa-soba/i18n.js | grep -q GLOSSARY && break; sleep 15; done
+          mkdir -p probe t && cd t && npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+          cat > t.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const b = await chromium.launch();
+          const out = [];
+          for (const lang of ['en','ko','zh-TW']) {
+            const ctx = await b.newContext({ viewport:{width:390,height:844}, locale:'ja-JP' });
+            await ctx.addCookies([{name:'googtrans', value:'/ja/'+lang, domain:'anji-1173.github.io', path:'/'}]);
+            const p = await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+            await p.goto('https://anji-1173.github.io/okinawa-soba/#shop/'+encodeURIComponent('そば処くんち'), {waitUntil:'networkidle'});
+            await p.waitForTimeout(9000);
+            const txt = await p.$$eval('#article-view .art-body p', e=>e.slice(0,14).map(x=>x.innerText));
+            const h1 = await p.$eval('#article-view h1', e=>e.innerText).catch(()=>null);
+            const note = await p.$eval('#i18n-note', e=>e.innerText).catch(()=>null);
+            const gt = await p.evaluate(()=>!!(window.google&&google.translate&&google.translate.TranslateElement));
+            out.push({lang, h1, gt, note, errs, txt});
+            await p.screenshot({path:'../probe/'+lang+'_top.png'});
+            await p.$eval('#article-view .art-stars', e=>e.scrollIntoView({block:'center'})).catch(()=>{});
+            await p.screenshot({path:'../probe/'+lang+'_stars.png'});
+            // 静的ページ
+            await p.goto('https://anji-1173.github.io/okinawa-soba/shop/'+encodeURIComponent('そば処くんち')+'/', {waitUntil:'networkidle'});
+            await p.waitForTimeout(8000);
+            out.push({lang:lang+'-static', h1: await p.$eval('h1',e=>e.innerText), txt: await p.$$eval('article p', e=>e.slice(5,9).map(x=>x.innerText))});
+            await p.screenshot({path:'../probe/'+lang+'_static.png'});
+            await ctx.close();
+          }
+          const fs = await import('fs'); fs.writeFileSync('../probe/result.json', JSON.stringify(out,null,1));
+          await b.close();
+          JS
+          node t.mjs
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add probe && git commit -m "i18n probe [skip ci]" && git push
