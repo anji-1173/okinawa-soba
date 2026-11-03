@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: test translation on live site
         run: |
-          for i in $(seq 1 40); do curl -s https://anji-1173.github.io/okinawa-soba/i18n.js | grep -q "そば処" && break; sleep 15; done
+          for i in $(seq 1 40); do curl -s https://anji-1173.github.io/okinawa-soba/i18n.js | grep -q "i18n-glossary" && break; sleep 15; done
           mkdir -p probe t && cd t && npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
           cat > t.mjs <<'JS'
           import { chromium } from 'playwright';
