@@ -1,0 +1,6 @@
+translate.goog top: 200
+translate.goog index.html: 200
+element.js: 200
+webkit-iphone console: Successfully preconnected to https://fonts.gstatic.com/
+webkit-iphone console: Successfully preconnected to https://fonts.googleapis.com/
+webkit-iphone resp: 200 https://translate.google.com/translate_a/element.js?cb=__gtInit
