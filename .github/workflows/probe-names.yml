@@ -1,0 +1,49 @@
+name: i18n-probe
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: live site test (iPhone WebKit + Chromium)
+        run: |
+          mkdir -p probe t && cd t && npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null && npx playwright install --with-deps webkit chromium >/dev/null
+          cat > t.mjs <<'JS'
+          import { webkit, chromium, devices } from 'playwright';
+          import fs from 'fs';
+          const log = s => { console.log(s); fs.appendFileSync('../probe/log.txt', s+'\n'); };
+          const kana = /[ぁ-ゖァ-ヺ]/g;
+          const BASE = 'https://anji-1173.github.io/okinawa-soba/';
+          for (const [name, bt] of [['webkit-iphone', webkit], ['chromium-iphone', chromium]]) {
+            const b = await bt.launch();
+            for (const lang of ['en','ko','zh-TW','zh-CN']) {
+              const ctx = await b.newContext({ ...devices['iPhone 13'], locale:'ja-JP' });
+              const p = await ctx.newPage(); const errs=[]; p.on('pageerror', e=>errs.push(e.message.slice(0,150)));
+              const bad=[]; p.on('response', r=>{ if (r.status()>=400 && r.url().startsWith(BASE)) bad.push(r.status()+' '+r.url().slice(-60)); });
+              await p.goto(BASE+'?lang='+lang, {waitUntil:'domcontentloaded', timeout:60000}); await p.waitForTimeout(5000);
+              const top = await p.evaluate(()=>({title:document.title, nav:[...document.querySelectorAll('nav .links a')].map(a=>a.textContent).join('/'), card:document.querySelector('.card h3')?.textContent, n:document.getElementById('result-count').textContent, sw:document.querySelector('#i18n-switch button')?.textContent, pins:document.querySelectorAll('#leaflet-map path.leaflet-interactive').length}));
+              await p.evaluate(()=>{ location.hash='shop/'+encodeURIComponent('そば処くんち'); }); await p.waitForTimeout(2500);
+              const art = await p.evaluate(()=>{ const v=document.querySelector('#article-view'); const c=v.cloneNode(true); c.querySelectorAll('.art-orig').forEach(e=>e.remove()); return {h1:v.querySelector('h1')?.textContent, p1:v.querySelector('.art-body p')?.textContent.slice(0,90), figs:v.querySelectorAll('figure').length, kana:(c.innerText.match(/[ぁ-ゖァ-ヺ]/g)||[]).length, stars:v.querySelector('.art-stars')?.innerText.replace(/\s+/g,' ')}; });
+              log(`${name} ${lang}: ${JSON.stringify(top)} | ${JSON.stringify(art)} | errs=${JSON.stringify(errs)} bad=${JSON.stringify(bad.slice(0,3))}`);
+              if (name==='webkit-iphone') await p.screenshot({path:`../probe/${lang}_article.png`});
+              await ctx.close();
+            }
+            // 検索用ページ
+            const ctx = await b.newContext({ ...devices['iPhone 13'], locale:'ja-JP' }); const p = await ctx.newPage();
+            for (const u of ['shop/'+encodeURIComponent('そば処くんち')+'/', 'en/shop/'+encodeURIComponent('そば処くんち')+'/', 'zh-CN/shop/EIBUN/']) {
+              const r = await p.goto(BASE+u, {waitUntil:'domcontentloaded', timeout:60000}); await p.waitForTimeout(1500);
+              log(`${name} static ${u.slice(0,24)}: ${r.status()} ${await p.title()} | video=${await p.$$eval('video',v=>v.length)} imgs=${await p.$$eval('article img',v=>v.length)}`);
+            }
+            await p.goto(BASE+'en/shop/'+encodeURIComponent('そば処くんち')+'/'); await p.click('#i18n-switch > button'); await p.click('#i18n-menu button[lang="ko"]'); await p.waitForTimeout(2500);
+            log(`${name} switch en->ko lands: ${decodeURIComponent(p.url().replace(BASE,''))} h1=${await p.$eval('h1',e=>e.textContent)}`);
+            await b.close();
+          }
+          JS
+          node t.mjs || true
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add probe && git commit -m "i18n probe [skip ci]" && git push
