@@ -1,0 +1,30 @@
+name: cf-probe
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check the Cloudflare site
+        run: |
+          mkdir -p probe
+          B=https://okinawa-soba.apps-okinawa.workers.dev
+          {
+          for u in / /robots.txt /sitemap.xml /20937f63d3c0c32c70e6a792b25c1c0c.txt /i18n/en.js /i18n/zh-TW.js "/shop/%E3%81%9D%E3%81%B0%E5%87%A6%E3%81%8F%E3%82%93%E3%81%A1/" "/zh-TW/shop/%E3%81%9D%E3%81%B0%E5%87%A6%E3%81%8F%E3%82%93%E3%81%A1/" /en/shop/EIBUN/ /photos/263/10.mp4 /sw.js; do
+            echo "$(curl -s -o /dev/null -w '%{http_code} %{size_download}B %{content_type}' "$B$u")  $u"
+          done
+          echo "--- top canonical:"; curl -s "$B/" | grep -o '<link rel="canonical"[^>]*>'
+          echo "--- top title:"; curl -s "$B/" | grep -o '<title>[^<]*</title>'
+          echo "--- version:"; curl -s "$B/" | grep -o "APP_VERSION = '[^']*'"
+          echo "--- zh page title/canonical/h1:"; curl -s "$B/zh-TW/shop/%E3%81%9D%E3%81%B0%E5%87%A6%E3%81%8F%E3%82%93%E3%81%A1/" | grep -o '<title>[^<]*</title>\|<link rel="canonical"[^>]*>\|<h1>[^<]*</h1>'
+          echo "--- sitemap first loc / count:"; curl -s "$B/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | head -2; curl -s "$B/sitemap.xml" | grep -c '<loc>'
+          echo "--- robots:"; curl -s "$B/robots.txt"
+          echo "--- key:"; curl -s "$B/20937f63d3c0c32c70e6a792b25c1c0c.txt"
+          } | tee probe/log.txt
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add probe && git commit -m "cf probe [skip ci]" && git push
