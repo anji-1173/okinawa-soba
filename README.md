@@ -1,5 +1,15 @@
 # アンジの沖縄そば巡りの旅 — ブログサイト
 
+**公開中のブログ：[沖縄そば巡りの旅｜沖縄本島の沖縄そば屋 食べ歩きレビュー](https://okinawa-soba.apps-okinawa.workers.dev/)**
+
+沖縄本島の沖縄そば屋の全店制覇を目指す食べ歩きブログです。写真付きの実食レビューと、麺・スープ・具の星評価でお店を紹介しています。
+
+- [お店の一覧と地図](https://okinawa-soba.apps-okinawa.workers.dev/)
+- [沖縄そばのうんちく（歴史・沖縄そばの日・木灰そば・麺と製麺所など）](https://okinawa-soba.apps-okinawa.workers.dev/trivia/)
+- English: [Okinawa Soba Journey](https://okinawa-soba.apps-okinawa.workers.dev/en/trivia/) ／ 한국어: [오키나와 소바 순례 여행](https://okinawa-soba.apps-okinawa.workers.dev/ko/trivia/) ／ 繁體中文: [沖繩麵巡禮之旅](https://okinawa-soba.apps-okinawa.workers.dev/zh-TW/trivia/)
+
+---
+
 note（ https://note.com/anjiijna ）で連載中の「沖縄そば巡りの旅」をもとにした、
 アンジ専用の沖縄そばブログサイトです。
 
